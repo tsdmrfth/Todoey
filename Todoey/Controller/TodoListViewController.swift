@@ -7,16 +7,20 @@
 //
 
 import UIKit
+import CoreData
 
 class TodoListViewController: UITableViewController {
     
     var todoItemArray = [TodoItem]()
-    var filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("TodoItemList.plist")
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    var selectedCategory : TodoItemCategory? {
+        didSet {
+            loadItems()
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        loadItems()
     }
     
     //MARK - TableView Data Source Methods
@@ -53,8 +57,10 @@ class TodoListViewController: UITableViewController {
         
         let action = UIAlertAction(title: "Add TODO", style: .default) { (action) in
             
-            let newTodoItem = TodoItem()
+            let newTodoItem = TodoItem(context: self.context)
             newTodoItem.text = textField.text!
+            newTodoItem.isChecked = false
+            newTodoItem.category = self.selectedCategory!
             
             self.todoItemArray.append(newTodoItem)
             
@@ -72,26 +78,58 @@ class TodoListViewController: UITableViewController {
     
     //MARK - Data Manipulation Methods
     func saveItems(){
-        let encoder = PropertyListEncoder()
-        
         do{
-            let data = try encoder.encode(todoItemArray)
-            try data.write(to: filePath!)
+            try context.save()
         } catch {
-            print("Error occured when encoding data.")
+            print("Error saving context \(error)")
         }
     }
     
-    func loadItems(){
-        if let data = try? Data(contentsOf: filePath!) {
-            let decoder = PropertyListDecoder()
-            do {
-                todoItemArray = try decoder.decode([TodoItem].self, from: data)
-            } catch {
-                print("Error occured when decoding data.")
-            }
+    func loadItems(with request : NSFetchRequest<TodoItem> = TodoItem.fetchRequest(), predicate : NSPredicate? = nil){
+        let categoryPredicate = NSPredicate(format: "category.categoryName MATCHES %@", selectedCategory!.categoryName!)
+        
+        if let additionalPredicate = predicate {
+            let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
+            request.predicate = compoundPredicate
+        } else {
+            request.predicate = categoryPredicate
         }
+    
+        do {
+            todoItemArray = try context.fetch(request)
+        } catch {
+            print("Error occured when fetching data from context. \(error)")
+        }
+        
+        tableView.reloadData()
     }
     
 }
+
+// MARK - Search bar methods
+extension TodoListViewController : UISearchBarDelegate {
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        let request : NSFetchRequest<TodoItem> = TodoItem.fetchRequest()
+        let predicate = NSPredicate(format: "text CONTAINS[cd] %@", searchBar.text!)
+        
+        if searchText.count == 0 {
+            loadItems(with : request, predicate: nil)
+            
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+            return
+        }
+        
+        request.predicate = predicate
+        
+        request.sortDescriptors = [NSSortDescriptor(key: "text", ascending: true)]
+       
+        loadItems(with: request, predicate: predicate)
+    }
+}
+
+
+
 

@@ -12,7 +12,8 @@
 		2D35DAFD206C4632009A4663 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2D35DAFB206C4632009A4663 /* Main.storyboard */; };
 		2D35DAFF206C4632009A4663 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2D35DAFE206C4632009A4663 /* Assets.xcassets */; };
 		2D35DB02206C4632009A4663 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2D35DB00206C4632009A4663 /* LaunchScreen.storyboard */; };
-		2D35DB0A206C5F49009A4663 /* TodoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D35DB09206C5F49009A4663 /* TodoItem.swift */; };
+		2D9DB67D20710B3400F0CDFD /* CoreDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2D9DB67B20710B3400F0CDFD /* CoreDataModel.xcdatamodeld */; };
+		2D9DB68320712A1500F0CDFD /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D9DB68220712A1500F0CDFD /* CategoryViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,7 +24,8 @@
 		2D35DAFE206C4632009A4663 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2D35DB01206C4632009A4663 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		2D35DB03206C4632009A4663 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2D35DB09206C5F49009A4663 /* TodoItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItem.swift; sourceTree = "<group>"; };
+		2D9DB67C20710B3400F0CDFD /* CoreDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreDataModel.xcdatamodel; sourceTree = "<group>"; };
+		2D9DB68220712A1500F0CDFD /* CategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,7 +71,7 @@
 		2D35DB0B206C5F52009A4663 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				2D35DB09206C5F49009A4663 /* TodoItem.swift */,
+				2D9DB67B20710B3400F0CDFD /* CoreDataModel.xcdatamodeld */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -95,6 +97,7 @@
 			isa = PBXGroup;
 			children = (
 				2D35DAF9206C4632009A4663 /* TodoListViewController.swift */,
+				2D9DB68220712A1500F0CDFD /* CategoryViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -126,7 +129,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0920;
-				LastUpgradeCheck = 0920;
+				LastUpgradeCheck = 0930;
 				ORGANIZATIONNAME = "Fatih Tasdemir";
 				TargetAttributes = {
 					2D35DAF3206C4632009A4663 = {
@@ -171,8 +174,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D9DB68320712A1500F0CDFD /* CategoryViewController.swift in Sources */,
 				2D35DAFA206C4632009A4663 /* TodoListViewController.swift in Sources */,
-				2D35DB0A206C5F49009A4663 /* TodoItem.swift in Sources */,
+				2D9DB67D20710B3400F0CDFD /* CoreDataModel.xcdatamodeld in Sources */,
 				2D35DAF8206C4632009A4663 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -213,6 +217,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -220,6 +225,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -270,6 +276,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -277,6 +284,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -358,6 +366,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		2D9DB67B20710B3400F0CDFD /* CoreDataModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				2D9DB67C20710B3400F0CDFD /* CoreDataModel.xcdatamodel */,
+			);
+			currentVersion = 2D9DB67C20710B3400F0CDFD /* CoreDataModel.xcdatamodel */;
+			path = CoreDataModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 2D35DAEC206C4632009A4663 /* Project object */;
 }
