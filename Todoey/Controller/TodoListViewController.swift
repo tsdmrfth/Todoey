@@ -7,12 +7,12 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class TodoListViewController: UITableViewController {
     
-    var todoItemArray = [TodoItem]()
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    let realm = try! Realm()
+    var todoItems : Results<TodoItem>?
     var selectedCategory : TodoItemCategory? {
         didSet {
             loadItems()
@@ -21,24 +21,26 @@ class TodoListViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        print(Realm.Configuration.defaultConfiguration.fileURL)
     }
     
     //MARK - TableView Data Source Methods
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return todoItemArray.count
+        return todoItems?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "TodoListCell", for: indexPath)
         
-        let item = todoItemArray[indexPath.row]
-        
-        cell.textLabel?.text = item.text
-        
-        cell.accessoryType = item.isChecked ? .checkmark : .none
-        
-        saveItems()
+        if let item = todoItems?[indexPath.row] {
+            cell.textLabel?.text = item.text
+            
+            cell.accessoryType = item.isChecked ? .checkmark : .none
+            
+        } else {
+            cell.textLabel?.text = "No TODOs added"
+        }
         
         return cell
         
@@ -46,8 +48,16 @@ class TodoListViewController: UITableViewController {
     
     //MARK - TableView Delegate Methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        todoItemArray[indexPath.row].isChecked = !todoItemArray[indexPath.row].isChecked
-        tableView.reloadData()
+        if let item = todoItems?[indexPath.row] {
+            do {
+                try realm.write {
+                    item.isChecked = !item.isChecked
+                    tableView.reloadData()
+                }
+            } catch {
+                print("An error occured when updating item \(error)")
+            }
+        }
     }
     
     //MARK - Add New Items
@@ -56,16 +66,25 @@ class TodoListViewController: UITableViewController {
         let alert = UIAlertController(title : "Add New TODOs", message : "", preferredStyle : .alert)
         
         let action = UIAlertAction(title: "Add TODO", style: .default) { (action) in
-            
-            let newTodoItem = TodoItem(context: self.context)
-            newTodoItem.text = textField.text!
-            newTodoItem.isChecked = false
-            newTodoItem.category = self.selectedCategory!
-            
-            self.todoItemArray.append(newTodoItem)
-            
-            self.saveItems()
-            self.tableView.reloadData()
+            if textField.text?.count != 0{
+                if let currentCategory = self.selectedCategory {
+                    do{
+                        try self.realm.write {
+                            let newTodoItem = TodoItem()
+                            newTodoItem.text = textField.text!
+                            newTodoItem.isChecked = false
+                            newTodoItem.createdDate = Date()
+                            currentCategory.items.append(newTodoItem)
+                            
+                            self.realm.add(newTodoItem)
+                        }
+                    } catch {
+                        print("Error persisting data \(error)")
+                    }
+                }
+                
+                self.tableView.reloadData()
+            }
         }
         
         alert.addTextField { (alertTextField) in
@@ -75,58 +94,32 @@ class TodoListViewController: UITableViewController {
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
     }
+
     
-    //MARK - Data Manipulation Methods
-    func saveItems(){
-        do{
-            try context.save()
-        } catch {
-            print("Error saving context \(error)")
-        }
-    }
-    
-    func loadItems(with request : NSFetchRequest<TodoItem> = TodoItem.fetchRequest(), predicate : NSPredicate? = nil){
-        let categoryPredicate = NSPredicate(format: "category.categoryName MATCHES %@", selectedCategory!.categoryName!)
+    func loadItems(){
         
-        if let additionalPredicate = predicate {
-            let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
-            request.predicate = compoundPredicate
-        } else {
-            request.predicate = categoryPredicate
-        }
-    
-        do {
-            todoItemArray = try context.fetch(request)
-        } catch {
-            print("Error occured when fetching data from context. \(error)")
-        }
+        todoItems = selectedCategory?.items.sorted(byKeyPath: "createdDate", ascending: false)
         
         tableView.reloadData()
     }
     
 }
 
-// MARK - Search bar methods
+//MARK - Search bar methods
 extension TodoListViewController : UISearchBarDelegate {
-    
+
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        let request : NSFetchRequest<TodoItem> = TodoItem.fetchRequest()
-        let predicate = NSPredicate(format: "text CONTAINS[cd] %@", searchBar.text!)
-        
         if searchText.count == 0 {
-            loadItems(with : request, predicate: nil)
-            
+            loadItems()
+
             DispatchQueue.main.async {
                 searchBar.resignFirstResponder()
             }
             return
         }
         
-        request.predicate = predicate
-        
-        request.sortDescriptors = [NSSortDescriptor(key: "text", ascending: true)]
-       
-        loadItems(with: request, predicate: predicate)
+        todoItems = todoItems!.filter("text CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "text", ascending: false)
+        tableView.reloadData()
     }
 }
 
