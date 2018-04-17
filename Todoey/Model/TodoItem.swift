@@ -14,6 +14,7 @@ class TodoItem: Object {
     @objc dynamic var text : String = ""
     @objc dynamic var isChecked : Bool = false
     @objc dynamic var createdDate : Date?
+    @objc dynamic var colour : String = ""
     var parentCatgory = LinkingObjects(fromType: TodoItemCategory.self, property: "items")
     
 }
