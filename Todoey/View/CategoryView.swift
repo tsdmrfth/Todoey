@@ -15,10 +15,9 @@ class CategoryView: UIView {
     
     fileprivate let categoriesScrollView = UIScrollView()
     fileprivate let rootFlexContainer = UIView()
+    fileprivate var todoItemCategories: [TodoItemCategory]?
     
-    fileprivate var todoItemCategories: Results<TodoItemCategory>?
-    
-    init(categories: Results<TodoItemCategory>) {
+    init(categories: [TodoItemCategory]) {
         self.todoItemCategories = categories
         
         super.init(frame: .zero)
@@ -35,21 +34,27 @@ class CategoryView: UIView {
         
         categoriesScrollView.backgroundColor = .lightText
         
+        addCategories()
+        
+        categoriesScrollView.addSubview(rootFlexContainer)
+        addSubview(categoriesScrollView)
+    }
+    
+    fileprivate func addCategories(){
         if let categories = todoItemCategories {
             
-            for category in categories {
+            rootFlexContainer.subviews.forEach({ $0.removeFromSuperview() })
+            
+            for category in categories.reversed() {
                 
-                rootFlexContainer.flex.wrap(.wrap).direction(.row).justifyContent(.start).define { (rootFlex) in
+                rootFlexContainer.flex.wrap(.wrap).direction(.row).alignContent(.stretch).define { (rootFlex) in
                     let categoryViewCell = CategoryViewCell()
                     categoryViewCell.configureView(category: category)
                     
-                    rootFlex.addItem(categoryViewCell).padding(5)
+                    rootFlex.addItem(categoryViewCell)
                 }
-                
+                layout()
             }
-            
-            categoriesScrollView.addSubview(rootFlexContainer)
-            addSubview(categoriesScrollView)
         }
     }
     
@@ -68,14 +73,19 @@ class CategoryView: UIView {
     }
     
     func addCategory(category: TodoItemCategory){
-        rootFlexContainer.flex.wrap(.wrap).paddingTop(5).justifyContent(.spaceEvenly).direction(.row).alignItems(.stretch).define { (rootFlex) in
+        rootFlexContainer.flex.wrap(.wrap).direction(.row).justifyContent(.start).define { (rootFlex) in
             let categoryViewCell = CategoryViewCell()
             categoryViewCell.configureView(category: category)
             
             rootFlex.addItem(categoryViewCell).marginBottom(5).marginTop(5)
-            print("here")
+            
             layout()
         }
+    }
+    
+    func refreshCategories(_ categories:  [TodoItemCategory]) {
+        self.todoItemCategories = categories
+        addCategories()
     }
     
 }

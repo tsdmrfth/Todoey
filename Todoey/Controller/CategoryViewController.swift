@@ -11,6 +11,8 @@ import RealmSwift
 import SwipeCellKit
 import ChameleonFramework
 import FlexLayout
+import SwiftEventBus
+import Foundation
 
 class CategoryViewController: UIViewController {
     
@@ -19,13 +21,35 @@ class CategoryViewController: UIViewController {
     }
     
     private let realm = try! Realm()
-    private var todoItemCategories : Results<TodoItemCategory>?
+    private var todoItemCategories : [TodoItemCategory]?
     
     //MARK - Lifecycle Methods
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         loadItems()
+        
+        print(Realm.Configuration.defaultConfiguration.fileURL!)
+        
+        
+        SwiftEventBus.onMainThread(self, name: Constant.onDeleteButtonClicked) { (event) in
+            let deleteButtonEvent = event.object as! DeleteButtonEvent
+            let category = deleteButtonEvent.itemToDelete as! TodoItemCategory
+            self.deleteCategory(category)
+        }
+        
+        SwiftEventBus.onMainThread(self, name: Constant.onSaveButtonClicked) { (event) in
+            let saveButtonEvent = event.object as! SaveButtonEvent
+            let category = saveButtonEvent.itemToUpdate as! TodoItemCategory
+            let property = saveButtonEvent.itemPropertyToUpdate
+            
+            self.updateCategory(category, property!)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        SwiftEventBus.unregister(self)
     }
     
     //MARK - Add new items
@@ -39,6 +63,7 @@ class CategoryViewController: UIViewController {
                 let newTodoItemCategory = TodoItemCategory()
                 newTodoItemCategory.categoryName = textField.text!
                 newTodoItemCategory.colour = UIColor.randomFlat.hexValue()
+                newTodoItemCategory.createDate = Date().toString(format: "EEE, dd MMM yyyy HH:mm")
                 self.saveItems(category: newTodoItemCategory)
             }
         }
@@ -60,7 +85,7 @@ class CategoryViewController: UIViewController {
     //    }
     
     //MARK - Data Manipulation Methods
-    func saveItems(category: TodoItemCategory){
+    fileprivate func saveItems(category: TodoItemCategory){
         do{
             try realm.write {
                 realm.add(category)
@@ -71,12 +96,63 @@ class CategoryViewController: UIViewController {
         }
     }
     
-    func loadItems(){
-        todoItemCategories = realm.objects(TodoItemCategory.self)
+    fileprivate func deleteCategory(_ category: TodoItemCategory) {
+        do {
+            try realm.write {
+                realm.delete(category)
+                
+                todoItemCategories = sortCategoriesByDate()
+                
+                guard let categories = todoItemCategories else {
+                    return
+                }
+                
+                categoryView.refreshCategories(categories.reversed())
+                
+            }
+        } catch {
+            print("Error deleting context \(error)")
+        }
+    }
+    
+    fileprivate func updateCategory(_ category: TodoItemCategory, _ property: String){
+        do {
+            try realm.write {
+                category.categoryName = property
+                category.createDate = Date().toString(format: "EEE, dd MMM yyyy HH:mm")
+                
+                todoItemCategories = sortCategoriesByDate()
+                
+                guard let categories = todoItemCategories else {
+                    return
+                }
+                
+                categoryView.refreshCategories(categories.reversed())
+            }
+        } catch  {
+            print("Error updating context \(error)")
+        }
+    }
+    
+    fileprivate func loadItems(){
+        todoItemCategories = sortCategoriesByDate()
         
         view = CategoryView(categories: todoItemCategories!)
+        
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(self.onAddNewCategoryButtonClicked(_:)))
-        //tableView.reloadData()
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedStringKey.foregroundColor : UIColor.flatGray]
+        navigationController?.navigationBar.tintColor = UIColor.flatGray
+        
+        title = "Todoey"
+    }
+    
+    fileprivate func sortCategoriesByDate() -> [TodoItemCategory] {
+        let categories = realm.objects(TodoItemCategory.self)
+        
+        let reversedArray: Array = categories.reversed()
+        
+        return reversedArray.sorted(by: { $0.createDate.compare($1.createDate) == ComparisonResult.orderedDescending })
     }
     
 }
