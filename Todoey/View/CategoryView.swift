@@ -45,17 +45,29 @@ class CategoryView: UIView {
             
             rootFlexContainer.subviews.forEach({ $0.removeFromSuperview() })
             
-            for category in categories.reversed() {
-                
+            categories.forEach { (category) in
                 rootFlexContainer.flex.wrap(.wrap).direction(.row).alignContent(.stretch).define { (rootFlex) in
                     let categoryViewCell = CategoryViewCell()
-                    categoryViewCell.configureView(category: category)
                     
-                    rootFlex.addItem(categoryViewCell)
+                    categoryViewCell.configureView(category: category)
+                    rootFlex.addItem(categoryViewCell).grow(1).marginHorizontal(2.5).marginVertical(5)
                 }
-                layout()
+            }
+            
+            layout()
+        }
+    }
+    
+    fileprivate func resize(changedCell: CategoryViewCell){
+        
+        for aCell in rootFlexContainer.subviews {
+            let cellToChange = aCell as! CategoryViewCell
+            if cellToChange.todoItemCategory == changedCell.todoItemCategory {
+                cellToChange.flex.height(changedCell.frame.size.height)
             }
         }
+        
+        layout()
     }
     
     override func layoutSubviews() {
@@ -73,19 +85,17 @@ class CategoryView: UIView {
     }
     
     func addCategory(category: TodoItemCategory){
-        rootFlexContainer.flex.wrap(.wrap).direction(.row).justifyContent(.start).define { (rootFlex) in
-            let categoryViewCell = CategoryViewCell()
-            categoryViewCell.configureView(category: category)
-            
-            rootFlex.addItem(categoryViewCell).marginBottom(5).marginTop(5)
-            
-            layout()
-        }
+        self.todoItemCategories?.append(category)
+        addCategories()
     }
     
     func refreshCategories(_ categories:  [TodoItemCategory]) {
         self.todoItemCategories = categories
         addCategories()
+    }
+    
+    func addNewCategoryCell(){
+        
     }
     
 }

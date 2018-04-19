@@ -22,8 +22,7 @@ class CategoryViewCell: UIView {
     fileprivate let dateLabel = UILabel()
     fileprivate let buttonsView = UIView()
     fileprivate var isButtonsHidden: Bool = true
-    
-    fileprivate var todoItemCategory: TodoItemCategory!
+    var todoItemCategory: TodoItemCategory!
     
     init() {
         super.init(frame: .zero)
@@ -32,19 +31,19 @@ class CategoryViewCell: UIView {
     }
     
     required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
+        fatalError("init(coder:) has not been implemented")
     }
     
     fileprivate func initializeView(){
-        saveButton.setImage(UIImage(named: "save"), for: .normal)
+        saveButton.setImage(UIImage(named: Constant.save), for: .normal)
         saveButton.addTarget(self, action: #selector(self.onSaveButtonClicked), for: .touchUpInside)
         saveButton.alpha = 0
         
-        deleteButton.setImage(UIImage(named: "delete"), for: .normal)
+        deleteButton.setImage(UIImage(named: Constant.delete), for: .normal)
         deleteButton.addTarget(self, action: #selector(self.onDeleteButtonClicked), for: .touchUpInside)
         deleteButton.alpha = 0
         
-        editButton.setImage(UIImage(named: "edit"), for: .normal)
+        editButton.setImage(UIImage(named: Constant.edit), for: .normal)
         editButton.addTarget(self, action: #selector(self.onEditButtonClicked), for: .touchUpInside)
         editButton.alpha = 0
         
@@ -72,7 +71,7 @@ class CategoryViewCell: UIView {
     }
     
     fileprivate func layout(){
-        frameView.flex.margin(5).maxWidth(180).minWidth(100)
+        frameView.flex.maxWidth(180).minWidth(100).marginBottom(10)
         
         buttonsView.flex.alignSelf(.center).marginTop(10).direction(.row).define { (flex) in
             flex.addItem(saveButton).size(20)
@@ -80,11 +79,13 @@ class CategoryViewCell: UIView {
             flex.addItem(deleteButton).size(20).marginLeft(25)
         }
         
-        dateLabel.flex.alignSelf(.end).marginBottom(5).marginRight(5)
+        dateLabel.pin.bottom(5)
+        dateLabel.flex.alignSelf(.end).marginRight(5)
+    
+        textView.pin.height(of: frameView).width(of: frameView)
+        textView.flex.paddingEnd(5).paddingTop(40)
         
-        textView.flex.alignSelf(.auto).paddingEnd(5).paddingTop(40).paddingBottom(15)
-        
-        frameView.layer.cornerRadius = 10
+        frameView.layer.cornerRadius = 5
         frameView.clipsToBounds = true
     }
     
@@ -99,7 +100,7 @@ class CategoryViewCell: UIView {
         textView.text = category.categoryName
         textView.textColor = ContrastColorOf(UIColor(hexString: category.colour)!, returnFlat: true)
         
-        dateLabel.text = category.createDate
+        dateLabel.text = category.createDate.toString(format: "EEE, dd MM yyyy HH:mm")
         dateLabel.textColor = ContrastColorOf(UIColor(hexString: category.colour)!, returnFlat: true)
         
         frameView.layer.cornerRadius = 5
@@ -147,6 +148,17 @@ class CategoryViewCell: UIView {
                 self.editButton.alpha = 1
                 self.deleteButton.alpha = 1
             }
+            
+            UIView.animate(withDuration: 0.5, delay: 0.3, options: UIViewAnimationOptions.beginFromCurrentState, animations: {
+                self.editButton.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
+            }) { (process) in
+                UIView.animate(withDuration: 0.5, animations: {
+                  self.editButton.transform = CGAffineTransform(rotationAngle: 0)
+                })
+            }
+            
+            deleteButton.shake()
+            
         } else {
             isButtonsHidden = true
             UIView.animate(withDuration: 0.8) {
@@ -162,12 +174,25 @@ class CategoryViewCell: UIView {
         }
     }
     
+    fileprivate func adjustTextViewHeight() {
+        let fixedWidth = textView.frame.size.width
+        
+        let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
+        
+        let difference = newSize.height - 35
+        
+        self.frameView.pin.height(84 + difference)
+        
+        layout()
+    }
+    
 }
 
 extension CategoryViewCell: UITextViewDelegate {
     
     func textViewDidChange(_ textView: UITextView) {
         changeSaveButtonAlpha(to: 1)
+        adjustTextViewHeight()
     }
     
 }

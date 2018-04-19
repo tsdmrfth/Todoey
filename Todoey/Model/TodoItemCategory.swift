@@ -14,12 +14,6 @@ class TodoItemCategory: Object {
     @objc dynamic var categoryName: String = ""
     @objc dynamic var colour: String = ""
     let items = List<TodoItem>()
-    @objc dynamic var createDate: String = ""
-    
-    func convertStringToDate() -> Date {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd MMM yyyy HH:mm"
-        return dateFormatter.date(from: createDate)!
-    }
+    @objc dynamic var createDate: Date!
     
 }
